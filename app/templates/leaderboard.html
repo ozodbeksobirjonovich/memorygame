@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natijalar - Memory Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen">
+    <header class="bg-blue-800 bg-opacity-80 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-white">Memory Game</a>
+            
+            <div class="flex space-x-4">
+                <a href="/game" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-white text-sm">
+                    O'yinga qaytish
+                </a>
+                <a href="/profile" class="px-3 py-1 bg-purple-700 hover:bg-purple-600 rounded text-white text-sm">
+                    Profil
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-blue-800 bg-opacity-30 rounded-xl shadow-xl p-6 mb-8">
+            <h1 class="text-3xl font-bold text-white mb-6">Eng yuqori natijalar</h1>
+            
+            <div class="bg-blue-900 bg-opacity-50 p-4 rounded-lg mb-6">
+                <h2 class="text-xl font-bold text-white mb-4">Qidirish va saralash</h2>
+                
+                <form action="/leaderboard" method="get" class="grid md:grid-cols-4 gap-4">
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-blue-200 mb-1">Ism bo'yicha qidirish</label>
+                        <input type="text" id="search" name="search" value="{{ filters.search or '' }}" class="w-full px-3 py-2 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="region" class="block text-sm font-medium text-blue-200 mb-1">Viloyat</label>
+                        <select id="region" name="region" class="w-full px-3 py-2 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Barcha viloyatlar</option>
+                            {% for region_name in regions %}
+                                <option value="{{ region_name }}" {% if filters.region == region_name %}selected{% endif %}>{{ region_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="min_age" class="block text-sm font-medium text-blue-200 mb-1">Min. yosh</label>
+                            <input type="number" id="min_age" name="min_age" min="5" max="100" value="{{ filters.min_age or '' }}" class="w-full px-3 py-2 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="max_age" class="block text-sm font-medium text-blue-200 mb-1">Max. yosh</label>
+                            <input type="number" id="max_age" name="max_age" min="5" max="100" value="{{ filters.max_age or '' }}" class="w-full px-3 py-2 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-end space-x-2">
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition">
+                            <i class="fas fa-search mr-2"></i>Qidirish
+                        </button>
+                        
+                        <a href="/leaderboard" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg transition">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-blue-800 bg-opacity-20 border border-blue-700 rounded-lg">
+                    <thead>
+                        <tr class="bg-blue-700 bg-opacity-50 text-blue-100">
+                            <th class="py-3 px-4 text-left">#</th>
+                            <th class="py-3 px-4 text-left">O'quvchi</th>
+                            <th class="py-3 px-4 text-left">Viloyat</th>
+                            <th class="py-3 px-4 text-left">Yosh</th>
+                            <th class="py-3 px-4 text-left">Ball</th>
+                            <th class="py-3 px-4 text-left">O'lcham</th>
+                            <th class="py-3 px-4 text-left">Daraja</th>
+                            <th class="py-3 px-4 text-left">Vaqt</th>
+                            <th class="py-3 px-4 text-left">Sana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr class="border-t border-blue-700 hover:bg-blue-700 hover:bg-opacity-30">
+                                <td class="py-3 px-4 text-white">{{ loop.index }}</td>
+                                <td class="py-3 px-4 text-white font-medium">{{ result.full_name }}</td>
+                                <td class="py-3 px-4 text-blue-200">{{ result.region }}, {{ result.district }}</td>
+                                <td class="py-3 px-4 text-blue-200">
+                                    {% set age = (result.birthdate | string).split('-')[0] | int %}
+                                    {% set current_year = 2025 %}
+                                    {{ current_year - age }}
+                                </td>
+                                <td class="py-3 px-4 text-yellow-300 font-bold">{{ result.score }}</td>
+                                <td class="py-3 px-4 text-blue-200">{{ result.grid_size }}×{{ result.grid_size }}</td>
+                                <td class="py-3 px-4 text-blue-200">{{ result.level }}-{{ result.stage }}</td>
+                                <td class="py-3 px-4 text-blue-200">{{ result.duration }} sek</td>
+                                <td class="py-3 px-4 text-blue-200">{{ result.date[:10] }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="py-8 text-center text-white">Natijalar topilmadi...</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="bg-purple-800 bg-opacity-30 rounded-xl shadow-xl p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Natijalar haqida</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-purple-900 bg-opacity-40 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-2">
+                        <i class="fas fa-trophy text-yellow-400 mr-2"></i>Ball haqida
+                    </h3>
+                    <p class="text-blue-100">
+                        Ball daraja va bosqichga bog'liq. Qanchalik katta o'lchamdagi kataklardan foydalansangiz, shuncha ko'p ball olasiz.
+                    </p>
+                </div>
+                
+                <div class="bg-purple-900 bg-opacity-40 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-2">
+                        <i class="fas fa-chart-line text-green-400 mr-2"></i>Darajalar
+                    </h3>
+                    <p class="text-blue-100">
+                        O'yin 3×3 dan boshlanadi va har 5 bosqichdan keyin kattaroq o'lchamga o'tadi. Eng yuqori daraja - 50×50.
+                    </p>
+                </div>
+                
+                <div class="bg-purple-900 bg-opacity-40 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-2">
+                        <i class="fas fa-clock text-red-400 mr-2"></i>Vaqt
+                    </h3>
+                    <p class="text-blue-100">
+                        Ketma-ketliklarni eslab qolish va qayta takrorlash uchun berilgan vaqt daraja va ketma-ketlik uzunligiga bog'liq.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="bg-blue-900 bg-opacity-80 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-blue-200 text-sm">
+            <p>&copy; 2025 Memory Game. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </footer>
+</body>
+</html>

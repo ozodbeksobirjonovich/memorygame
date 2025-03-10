@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game - Xotira o'yini</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-5xl mx-auto">
+            <header class="text-center mb-12">
+                <h1 class="text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                    Memory Game
+                </h1>
+                <p class="text-xl text-blue-200 mb-8">Miyangizni dasturlashga tayyorlang va xotirangizni kuchaytiring!</p>
+                
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="/login" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition transform hover:scale-105">
+                        Kirish
+                    </a>
+                    <a href="/register" class="px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold transition transform hover:scale-105">
+                        Ro'yxatdan o'tish
+                    </a>
+                </div>
+            </header>
+            
+            <div class="grid md:grid-cols-2 gap-12 mb-16">
+                <div class="bg-blue-800 bg-opacity-50 p-8 rounded-xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4">O'yin haqida</h2>
+                    <p class="mb-4">Memory Game - bu xotirangizni mashq qildirishga va miyangizni dasturlashga tayyorlashga mo'ljallangan ajoyib o'yin.</p>
+                    <p class="mb-4">Bu o'yin orqali siz:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Xotirangizni kuchaytirasiz</li>
+                        <li>Diqqat va e'tiboringizni oshirasiz</li>
+                        <li>Algoritmik fikrlashni rivojlantirasiz</li>
+                        <li>Vizual ma'lumotlarni qayta ishlash qobiliyatingizni oshirasiz</li>
+                        <li>Dasturlash uchun muhim bo'lgan ketma-ketliklarni eslab qolishni o'rganasiz</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-purple-800 bg-opacity-50 p-8 rounded-xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4">O'yin qoidalari</h2>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>Katakchalar ketma-ketlikda yonib o'chadi</li>
+                        <li>Sizning vazifangiz - yonib o'chgan katakchalarni xuddi shu tartibda bosish</li>
+                        <li>To'g'ri javob berganingizda keyingi bosqichga o'tasiz</li>
+                        <li>Har 5 bosqichdan so'ng, o'yin maydoni kattalashadi</li>
+                        <li>3x3 o'lchamidan boshlab 50x50 gacha boradi</li>
+                        <li>Eng yuqori ball to'plashga harakat qiling!</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="bg-indigo-800 bg-opacity-50 p-8 rounded-xl shadow-xl mb-12">
+                <h2 class="text-2xl font-bold mb-4">Eng yuqori natijalar</h2>
+                <p class="mb-6">Yuqori natijalarni ko'rish uchun ro'yxatdan o'ting va o'yinga kiring. Siz o'z natijalaringizni boshqalar bilan taqqoslashingiz mumkin!</p>
+                <div class="flex justify-center">
+                    <a href="/leaderboard" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-bold transition">
+                        Yuqori natijalarni ko'rish
+                    </a>
+                </div>
+            </div>
+            
+            <footer class="text-center text-blue-300 text-sm">
+                <p>&copy; 2025 Memory Game. Barcha huquqlar himoyalangan.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Background particles animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.zIndex = '-1';
+            document.body.appendChild(canvas);
+            
+            const particles = [];
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 3 + 1,
+                    color: `rgba(255, 255, 255, ${Math.random() * 0.2 + 0.1})`,
+                    speedX: Math.random() * 0.5 - 0.25,
+                    speedY: Math.random() * 0.5 - 0.25
+                });
+            }
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(particle => {
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    
+                    if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+                    if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = particle.color;
+                    ctx.fill();
+                });
+            }
+            
+            animate();
+            
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

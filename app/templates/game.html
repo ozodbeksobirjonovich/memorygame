@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O'yin - Memory Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen">
+    <header class="bg-blue-800 bg-opacity-80 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-white">Memory Game</a>
+            
+            <div class="flex items-center space-x-4">
+                <button id="music-toggle" class="text-white p-2 rounded-full hover:bg-blue-700 transition">
+                    <i class="fas fa-volume-mute" id="music-icon"></i>
+                </button>
+                
+                <div class="flex items-center">
+                    <img src="/static/uploads/{{ user.avatar }}" alt="{{ user.full_name }}" class="w-8 h-8 rounded-full mr-2 object-cover">
+                    <span class="text-white font-medium">{{ user.full_name }}</span>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <a href="/profile" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded text-white text-sm">
+                        Profil
+                    </a>
+                    <a href="/leaderboard" class="px-3 py-1 bg-purple-700 hover:bg-purple-600 rounded text-white text-sm">
+                        Natijalar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="user-stats" class="bg-blue-800 bg-opacity-30 rounded-xl shadow-lg p-4 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-3 bg-blue-700 bg-opacity-30 rounded-lg">
+                <h3 class="text-blue-300 text-sm">Eng yuqori ball</h3>
+                <p id="best-score" class="text-white text-2xl font-bold">0</p>
+            </div>
+            <div class="text-center p-3 bg-blue-700 bg-opacity-30 rounded-lg">
+                <h3 class="text-blue-300 text-sm">Erishilgan daraja</h3>
+                <p id="max-level" class="text-white text-2xl font-bold">0</p>
+            </div>
+            <div class="text-center p-3 bg-blue-700 bg-opacity-30 rounded-lg">
+                <h3 class="text-blue-300 text-sm">Eng katta o'lcham</h3>
+                <p id="max-grid-size" class="text-white text-2xl font-bold">0×0</p>
+            </div>
+            <div class="text-center p-3 bg-blue-700 bg-opacity-30 rounded-lg">
+                <h3 class="text-blue-300 text-sm">Jami o'yinlar</h3>
+                <p id="games-played" class="text-white text-2xl font-bold">0</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-3/4 bg-blue-800 bg-opacity-20 rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center">
+                        <div class="text-2xl font-bold text-white">
+                            <span id="grid-size">3×3</span>
+                        </div>
+                        <div class="ml-4 px-3 py-1 bg-blue-600 rounded-lg text-white">
+                            Daraja: <span id="level">1</span> / Bosqich: <span id="stage">1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="px-3 py-1 bg-purple-600 rounded-lg text-white">
+                            Ball: <span id="score">0</span>
+                        </div>
+                        <div class="px-3 py-1 bg-red-600 rounded-lg text-white">
+                            Vaqt: <span id="timer">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="status-message" class="text-xl font-bold text-center text-white mb-6 p-3 rounded-lg">
+                    Boshlash tugmasini bosing
+                </div>
+                
+                <div id="game-container" class="flex justify-center items-center min-h-[300px] md:min-h-[400px] mb-6">
+                    <!-- O'yin maydoni shu yerda yaratiladi -->
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button id="start-button" class="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition transform hover:scale-105">
+                        Boshlash
+                    </button>
+                    <button id="restart-button" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition transform hover:scale-105 hidden">
+                        Qayta boshlash
+                    </button>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-1/4">
+                <div class="bg-purple-800 bg-opacity-20 rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-white mb-4">O'yin qoidalari</h2>
+                    <ul class="space-y-2 text-blue-200">
+                        <li class="flex items-start">
+                            <span class="text-purple-400 mr-2">•</span>
+                            <span>Katakchalar ketma-ketlikda yonib o'chadi</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-400 mr-2">•</span>
+                            <span>Yonib o'chgan katakchalarni ko'rsatilgan tartibda bosing</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-400 mr-2">•</span>
+                            <span>Har 5 bosqichdan so'ng o'yin maydoni kattalashadi</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-400 mr-2">•</span>
+                            <span>Xato qilsangiz, o'yin tugaydi</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-800 bg-opacity-20 rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-white mb-4">Maslahatlar</h2>
+                    <ul class="space-y-2 text-blue-200">
+                        <li class="flex items-start">
+                            <span class="text-blue-400 mr-2">•</span>
+                            <span>Katakchalarni guruhlarga bo'lib eslab qoling</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-400 mr-2">•</span>
+                            <span>Ko'rsatilayotganda ovoz chiqarib sanang</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-400 mr-2">•</span>
+                            <span>Har doim diqqatingizni jamlang</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-400 mr-2">•</span>
+                            <span>Mantiqiy ketma-ketliklarni qidirishni sinab ko'ring</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <audio id="background-music" loop>
+        <source src="/static/music/background.mp3" type="audio/mp3">
+    </audio>
+    <audio id="click-sound">
+        <source src="/static/music/click.mp3" type="audio/mp3">
+    </audio>
+
+    <script>
+        // F12 va kontekst menyuni bloklash
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Foydalanuvchi ma'lumotlarini o'zgaruvchi sifatida saqlash
+        const user = {
+            id: "{{ user.id }}",
+            name: "{{ user.full_name }}"
+        };
+    </script>
+    <script src="/static/js/game.js"></script>
+</body>
+</html>

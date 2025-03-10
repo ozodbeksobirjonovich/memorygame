@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ro'yxatdan o'tish - Memory Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen py-12">
+    <div class="max-w-2xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-xl p-8 m-4">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Memory Game</h1>
+            <p class="text-blue-200">Ro'yxatdan o'tish</p>
+        </div>
+        
+        <div id="error-message" class="hidden bg-red-500 bg-opacity-80 text-white p-3 rounded-lg mb-4 text-center"></div>
+        
+        <form id="register-form" class="space-y-6" enctype="multipart/form-data">
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-blue-200">Foydalanuvchi nomi</label>
+                    <input type="text" id="username" name="username" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label for="full_name" class="block text-sm font-medium text-blue-200">To'liq ism</label>
+                    <input type="text" id="full_name" name="full_name" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-blue-200">Parol</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label for="birthdate" class="block text-sm font-medium text-blue-200">Tug'ilgan sana</label>
+                    <input type="date" id="birthdate" name="birthdate" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label for="region" class="block text-sm font-medium text-blue-200">Viloyat</label>
+                    <select id="region" name="region" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">Viloyatni tanlang</option>
+                        {% for region_name in regions.keys() %}
+                            <option value="{{ region_name }}">{{ region_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="district" class="block text-sm font-medium text-blue-200">Tuman/Shahar</label>
+                    <select id="district" name="district" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required disabled>
+                        <option value="">Avval viloyatni tanlang</option>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="avatar" class="block text-sm font-medium text-blue-200">Profil rasmi (ixtiyoriy)</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div>
+                <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg transition transform hover:scale-105">
+                    Ro'yxatdan o'tish
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <p class="text-blue-200">Allaqachon hisobingiz bormi? <a href="/login" class="text-purple-400 hover:text-purple-300 font-medium">Kirish</a></p>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/" class="text-blue-300 hover:text-blue-200 font-medium">&larr; Bosh sahifaga qaytish</a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const regionSelect = document.getElementById('region');
+            const districtSelect = document.getElementById('district');
+            
+            // Viloyat tanlaganda tumanlarni yuklash
+            regionSelect.addEventListener('change', async function() {
+                const region = this.value;
+                if (!region) {
+                    districtSelect.innerHTML = '<option value="">Avval viloyatni tanlang</option>';
+                    districtSelect.disabled = true;
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/get-districts?region=${encodeURIComponent(region)}`);
+                    const data = await response.json();
+                    
+                    districtSelect.innerHTML = '';
+                    if (data.districts && data.districts.length > 0) {
+                        data.districts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district;
+                            option.textContent = district;
+                            districtSelect.appendChild(option);
+                        });
+                        districtSelect.disabled = false;
+                    } else {
+                        districtSelect.innerHTML = '<option value="">Tumanlar topilmadi</option>';
+                        districtSelect.disabled = true;
+                    }
+                } catch (error) {
+                    console.error('Error loading districts:', error);
+                }
+            });
+        });
+    </script>
+    <script src="/static/js/auth.js"></script>
+</body>
+</html>
