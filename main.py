@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,8 +30,8 @@ app.include_router(game_routes.router)
 app.include_router(user_routes.router)
 
 @app.on_event("startup")
-async def startup():
-    await create_tables()
+def startup():
+    create_tables()
 
 @app.get("/")
 async def root(request: Request):

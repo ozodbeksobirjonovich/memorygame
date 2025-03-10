@@ -1,17 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, Form
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from app.auth import get_current_user
-from app.database import get_db
-from app.models import GameResult
-import aiosqlite
+from app.models import User, GameResult
+from pydantic import BaseModel
 from typing import List, Optional
+from peewee import fn
+from datetime import datetime
 
 router = APIRouter(tags=["Game"])
 templates = Jinja2Templates(directory="app/templates")
 
+class GameResultRequest(BaseModel):
+    score: int
+    level: int
+    stage: int
+    grid_size: int
+    duration: int
+    completed: bool
+
 @router.get("/game")
-async def game_page(request: Request, current_user = Depends(get_current_user)):
+async def game_page(request: Request, current_user: User = Depends(get_current_user)):
     return templates.TemplateResponse("game.html", {
         "request": request,
         "user": current_user
@@ -20,55 +29,55 @@ async def game_page(request: Request, current_user = Depends(get_current_user)):
 @router.get("/leaderboard")
 async def leaderboard_page(
     request: Request, 
-    region: Optional[str] = None,
-    min_age: Optional[int] = None,
-    max_age: Optional[int] = None,
-    search: Optional[str] = None,
-    db = Depends(get_db)
+    region: Optional[str] = Query(None),
+    min_age: Optional[int] = Query(None),
+    max_age: Optional[int] = Query(None),
+    search: Optional[str] = Query(None)
 ):
-    query = """
-    SELECT 
-        r.id, 
-        u.full_name, 
-        u.birthdate, 
-        u.region, 
-        u.district, 
-        r.score, 
-        r.level, 
-        r.stage, 
-        r.grid_size, 
-        r.date,
-        r.duration
-    FROM game_results r
-    JOIN users u ON r.user_id = u.id
-    WHERE 1=1
-    """
-    params = []
+    # En yuqori ballga ega foydalanuvchilar 
+    query = (GameResult
+             .select(GameResult, User)
+             .join(User)
+             .group_by(GameResult.user)  # Har bir foydalanuvchi uchun bitta natija
+             .having(GameResult.score == fn.MAX(GameResult.score)))  # Har bir foydalanuvchi uchun eng yuqori balli
     
-    if region:
-        query += " AND u.region = ?"
-        params.append(region)
+    if region and region.strip():
+        query = query.where(User.region == region)
     
-    if min_age:
-        query += " AND (strftime('%Y', 'now') - strftime('%Y', u.birthdate)) >= ?"
-        params.append(min_age)
+    current_year = datetime.now().year
     
-    if max_age:
-        query += " AND (strftime('%Y', 'now') - strftime('%Y', u.birthdate)) <= ?"
-        params.append(max_age)
+    if min_age is not None:
+        query = query.where(current_year - fn.strftime('%Y', User.birthdate).cast('integer') >= min_age)
     
-    if search:
-        query += " AND u.full_name LIKE ?"
-        params.append(f"%{search}%")
+    if max_age is not None:
+        query = query.where(current_year - fn.strftime('%Y', User.birthdate).cast('integer') <= max_age)
     
-    query += " ORDER BY r.score DESC LIMIT 100"
+    if search and search.strip():
+        query = query.where(User.full_name.contains(search))
     
-    async with db.execute(query, params) as cursor:
-        results = [dict(row) for row in await cursor.fetchall()]
+    query = query.order_by(GameResult.score.desc()).limit(100)
+    
+    results = []
+    for result in query:
+        results.append({
+            'id': result.id,
+            'full_name': result.user.full_name,
+            'birthdate': result.user.birthdate,
+            'region': result.user.region,
+            'district': result.user.district,
+            'score': result.score,
+            'level': result.level,
+            'stage': result.stage,
+            'grid_size': result.grid_size,
+            'duration': result.duration,
+            'date': result.date.strftime("%Y-%m-%d %H:%M:%S")
+        })
     
     # Get all regions for filter
-    async with db.execute("SELECT DISTINCT region FROM users") as cursor:
-        regions = [dict(row)["region"] for row in await cursor.fetchall()]
+    regions = []
+    for user in User.select(User.region).distinct():
+        if user.region not in regions:
+            regions.append(user.region)
     
     return templates.TemplateResponse("leaderboard.html", {
         "request": request,
@@ -84,62 +93,64 @@ async def leaderboard_page(
 
 @router.post("/api/save-result")
 async def save_game_result(
-    result: GameResult,
-    current_user = Depends(get_current_user),
-    db = Depends(get_db)
+    result: GameResultRequest,
+    current_user: User = Depends(get_current_user)
 ):
-    # Verify the user_id in the result matches the current user
-    if result.user_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    
     try:
-        await db.execute("""
-        INSERT INTO game_results 
-        (user_id, score, level, stage, grid_size, duration, completed)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            result.user_id,
-            result.score,
-            result.level,
-            result.stage,
-            result.grid_size,
-            result.duration,
-            result.completed
-        ))
-        await db.commit()
+        # Foydalanuvchining mavjud eng yuqori balini tekshirish
+        best_result = GameResult.select().where(
+            GameResult.user == current_user
+        ).order_by(GameResult.score.desc()).first()
         
-        return {"status": "success", "message": "Result saved successfully"}
+        # Agar yangi natija oldingi yuqori natijadan yaxshiroq bo'lsa, yangilash
+        if best_result:
+            if result.score > best_result.score:
+                # Eski natijani yangilash
+                best_result.score = result.score
+                best_result.level = result.level
+                best_result.stage = result.stage
+                best_result.grid_size = result.grid_size
+                best_result.duration = result.duration
+                best_result.completed = result.completed
+                best_result.date = datetime.now()
+                best_result.save()
+                return {"status": "success", "message": "Natija yangilandi"}
+            else:
+                # Agar yangi natija yaxshiroq bo'lmasa, hech narsa qilmaymiz
+                return {"status": "info", "message": "Oldingi natijangiz yuqoriroq"}
+        else:
+            # Foydalanuvchi uchun yangi natija yaratish
+            game_result = GameResult.create(
+                user=current_user,
+                score=result.score,
+                level=result.level,
+                stage=result.stage,
+                grid_size=result.grid_size,
+                duration=result.duration,
+                completed=result.completed
+            )
+            return {"status": "success", "message": "Natija muvaffaqiyatli saqlandi"}
+            
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save result: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Natijani saqlashda xatolik: {str(e)}")
 
 @router.get("/api/user-stats")
-async def get_user_stats(current_user = Depends(get_current_user), db = Depends(get_db)):
-    user_id = current_user["id"]
-    
+async def get_user_stats(current_user: User = Depends(get_current_user)):
     # Get best score
-    async with db.execute(
-        "SELECT MAX(score) as best_score FROM game_results WHERE user_id = ?", 
-        (user_id,)
-    ) as cursor:
-        best_score_row = await cursor.fetchone()
-        best_score = best_score_row["best_score"] if best_score_row and best_score_row["best_score"] else 0
+    best_score_query = GameResult.select(fn.MAX(GameResult.score)).where(GameResult.user == current_user)
+    best_score = best_score_query.scalar() or 0
     
     # Get highest level reached
-    async with db.execute(
-        "SELECT MAX(level) as max_level, MAX(grid_size) as max_grid_size FROM game_results WHERE user_id = ?", 
-        (user_id,)
-    ) as cursor:
-        level_row = await cursor.fetchone()
-        max_level = level_row["max_level"] if level_row and level_row["max_level"] else 0
-        max_grid_size = level_row["max_grid_size"] if level_row and level_row["max_grid_size"] else 0
+    max_level_query = GameResult.select(fn.MAX(GameResult.level)).where(GameResult.user == current_user)
+    max_level = max_level_query.scalar() or 0
+    
+    # Get max grid size
+    max_grid_size_query = GameResult.select(fn.MAX(GameResult.grid_size)).where(GameResult.user == current_user)
+    max_grid_size = max_grid_size_query.scalar() or 0
     
     # Get total games played
-    async with db.execute(
-        "SELECT COUNT(*) as games_played FROM game_results WHERE user_id = ?", 
-        (user_id,)
-    ) as cursor:
-        games_row = await cursor.fetchone()
-        games_played = games_row["games_played"] if games_row else 0
+    games_played_query = GameResult.select(fn.COUNT(GameResult.id)).where(GameResult.user == current_user)
+    games_played = games_played_query.scalar() or 0
     
     return {
         "best_score": best_score,

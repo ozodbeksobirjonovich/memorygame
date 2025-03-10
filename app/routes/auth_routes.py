@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form, UploadFile, File
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
-from app.auth import authenticate_user, create_access_token, get_current_user, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.database import get_db, load_regions
-import aiosqlite
+from starlette.responses import Response
+from app.auth import authenticate_user, create_session, get_current_user, get_password_hash
+from app.database import load_regions
+from app.models import User
 import os
 from pathlib import Path
 import shutil
+from datetime import datetime
 
 router = APIRouter(tags=["Authentication"])
 templates = Jinja2Templates(directory="app/templates")
@@ -19,28 +19,38 @@ async def login_page(request: Request):
 
 @router.get("/register")
 async def register_page(request: Request):
-    regions = await load_regions()
+    regions = load_regions()
     return templates.TemplateResponse("register.html", {
         "request": request,
         "regions": regions
     })
 
-@router.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(get_db)):
-    user = await authenticate_user(form_data.username, form_data.password, db)
+@router.post("/login")
+async def login(
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    user = authenticate_user(username, password)
     if not user:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            content={"detail": "Noto'g'ri foydalanuvchi nomi yoki parol"}
         )
     
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user["username"]}, expires_delta=access_token_expires
+    # Create session
+    session_id = create_session(user)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        max_age=60*60*24*7,  # 7 days
+        path="/",
     )
     
-    return {"access_token": access_token, "token_type": "bearer", "user_id": user["id"]}
+    return {"status": "success", "user_id": user.id}
 
 @router.post("/register")
 async def register_user(
@@ -50,23 +60,22 @@ async def register_user(
     birthdate: str = Form(...),
     region: str = Form(...),
     district: str = Form(...),
-    avatar: UploadFile = File(None),
-    db = Depends(get_db)
+    avatar: UploadFile = File(None)
 ):
     # Check if username already exists
-    async with db.execute("SELECT username FROM users WHERE username = ?", (username,)) as cursor:
-        existing_user = await cursor.fetchone()
-        if existing_user:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "Username already registered"}
-            )
+    user_exists = User.select().where(User.username == username).exists()
+    if user_exists:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Bu foydalanuvchi nomi allaqachon ro'yxatga olingan"}
+        )
     
     # Hash the password
     hashed_password = get_password_hash(password)
     
-    # Save avatar if provided
-    avatar_filename = "default_avatar.png"
+    # Save avatar if provided, else use default
+    avatar_filename = "default_avatar.jpg"  # O'zgartirilgan qator - default rasm nomi
+    
     if avatar and avatar.filename:
         # Create uploads directory if it doesn't exist
         uploads_dir = Path("app/static/uploads")
@@ -82,20 +91,29 @@ async def register_user(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(avatar.file, buffer)
     
-    # Insert user into database
+    # Create user
     try:
-        await db.execute("""
-        INSERT INTO users (username, password, full_name, birthdate, region, district, avatar)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (username, hashed_password, full_name, birthdate, region, district, avatar_filename))
-        await db.commit()
+        User.create(
+            username=username,
+            password=hashed_password,
+            full_name=full_name,
+            birthdate=birthdate,
+            region=region,
+            district=district,
+            avatar=avatar_filename
+        )
         
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
-            content={"detail": "User registered successfully"}
+            content={"detail": "Foydalanuvchi muvaffaqiyatli ro'yxatga olindi"}
         )
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": f"Registration failed: {str(e)}"}
+            content={"detail": f"Ro'yxatdan o'tishda xatolik: {str(e)}"}
         )
+
+@router.get("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="session_id")
+    return RedirectResponse(url="/login")

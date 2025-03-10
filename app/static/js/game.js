@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function () {
 
     // O'yin elementlari
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         for (let i = 0; i < gridSize * gridSize; i++) {
             const cell = document.createElement('div');
-            cell.className = 'bg-blue-600 bg-opacity-30 hover:bg-opacity-40 rounded-lg cursor-pointer transition-colors duration-200';
+            cell.className = 'bg-blue-100 hover:bg-blue-200 rounded-lg cursor-pointer transition-colors duration-200';
             cell.style.width = `${cellSize}px`;
             cell.style.height = `${cellSize}px`;
             cell.dataset.index = i;
@@ -130,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         gameConfig.isShowingSequence = true;
         gameConfig.canPlayerClick = false;
         elements.statusMessage.textContent = "Diqqat bilan kuzating...";
-        elements.statusMessage.className = "text-xl font-bold text-center text-yellow-300 mb-6 p-3 bg-blue-800 bg-opacity-50 rounded-lg";
+        elements.statusMessage.className = "text-lg font-medium text-center text-yellow-700 mb-6 p-3 bg-yellow-50 rounded-lg";
 
         let currentIndex = 0;
         const flashTime = gameConfig.getFlashTime(gameConfig.currentLevel);
@@ -140,15 +139,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Barcha katakchalarni o'chirib qo'yish
                 const cells = elements.gameContainer.querySelectorAll('div[data-index]');
                 cells.forEach(cell => {
-                    cell.classList.remove('bg-purple-500');
-                    cell.classList.add('bg-blue-600', 'bg-opacity-30');
+                    cell.classList.remove('bg-blue-500');
+                    cell.classList.add('bg-blue-100');
                 });
 
                 // Hozirgi ketma-ketlikni yoqish
                 const index = gameConfig.sequence[currentIndex];
                 const cell = elements.gameContainer.querySelector(`div[data-index="${index}"]`);
-                cell.classList.remove('bg-blue-600', 'bg-opacity-30');
-                cell.classList.add('bg-purple-500');
+                cell.classList.remove('bg-blue-100');
+                cell.classList.add('bg-blue-500');
 
                 // Tovush chiqarish
                 if (gameConfig.musicEnabled) {
@@ -158,8 +157,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Yongan katakchani o'chirish
                 setTimeout(() => {
-                    cell.classList.remove('bg-purple-500');
-                    cell.classList.add('bg-blue-600', 'bg-opacity-30');
+                    cell.classList.remove('bg-blue-500');
+                    cell.classList.add('bg-blue-100');
                 }, flashTime * 0.7);
 
                 currentIndex++;
@@ -170,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 gameConfig.playerSequence = [];
 
                 elements.statusMessage.textContent = "Endi ketma-ketlikni takrorlang!";
-                elements.statusMessage.className = "text-xl font-bold text-center text-green-300 mb-6 p-3 bg-blue-800 bg-opacity-50 rounded-lg";
+                elements.statusMessage.className = "text-lg font-medium text-center text-green-700 mb-6 p-3 bg-green-50 rounded-lg";
                 startTimer();
             }
         }, flashTime);
@@ -205,8 +204,8 @@ document.addEventListener('DOMContentLoaded', function () {
         gameConfig.playerSequence.push(clickedIndex);
 
         // Visual feedback
-        event.target.classList.remove('bg-blue-600', 'bg-opacity-30');
-        event.target.classList.add('bg-purple-500');
+        event.target.classList.remove('bg-blue-100');
+        event.target.classList.add('bg-blue-500');
 
         // Tovush chiqarish
         if (gameConfig.musicEnabled) {
@@ -215,8 +214,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         setTimeout(() => {
-            event.target.classList.remove('bg-purple-500');
-            event.target.classList.add('bg-blue-600', 'bg-opacity-30');
+            event.target.classList.remove('bg-blue-500');
+            event.target.classList.add('bg-blue-100');
         }, 300);
 
         // Tekshirish
@@ -254,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             updateDisplay();
             elements.statusMessage.textContent = "Juda yaxshi! Keyingi bosqichga tayyorlaning...";
-            elements.statusMessage.className = "text-xl font-bold text-center text-green-300 mb-6 p-3 bg-blue-800 bg-opacity-50 rounded-lg";
+            elements.statusMessage.className = "text-lg font-medium text-center text-green-700 mb-6 p-3 bg-green-50 rounded-lg";
 
             setTimeout(() => {
                 startGame();
@@ -270,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const gameDuration = Math.floor((Date.now() - gameConfig.gameStartTime) / 1000);
 
         elements.statusMessage.textContent = message;
-        elements.statusMessage.className = "text-xl font-bold text-center text-red-300 mb-6 p-3 bg-red-900 bg-opacity-50 rounded-lg";
+        elements.statusMessage.className = "text-lg font-medium text-center text-red-700 mb-6 p-3 bg-red-50 rounded-lg";
 
         elements.startButton.classList.add('hidden');
         elements.restartButton.classList.remove('hidden');
@@ -286,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const gameDuration = Math.floor((Date.now() - gameConfig.gameStartTime) / 1000);
 
         elements.statusMessage.textContent = "Tabriklaymiz! Barcha darajalarni yakunladingiz!";
-        elements.statusMessage.className = "text-xl font-bold text-center text-green-300 mb-6 p-3 bg-green-900 bg-opacity-50 rounded-lg";
+        elements.statusMessage.className = "text-lg font-medium text-center text-green-700 mb-6 p-3 bg-green-50 rounded-lg";
 
         elements.startButton.classList.add('hidden');
         elements.restartButton.classList.remove('hidden');
@@ -301,7 +300,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const gridSize = gameConfig.getGridSize(gameConfig.currentLevel);
 
             const result = {
-                user_id: user.id,
                 score: gameConfig.score,
                 level: gameConfig.currentLevel,
                 stage: gameConfig.currentStage,
@@ -343,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
         gameConfig.gameStartTime = Date.now();
 
         elements.statusMessage.textContent = "Tayyor bo'ling...";
-        elements.statusMessage.className = "text-xl font-bold text-center text-blue-300 mb-6 p-3 bg-blue-800 bg-opacity-50 rounded-lg";
+        elements.statusMessage.className = "text-lg font-medium text-center text-blue-700 mb-6 p-3 bg-blue-50 rounded-lg";
 
         elements.startButton.classList.add('hidden');
         elements.restartButton.classList.add('hidden');
@@ -370,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateDisplay();
 
         elements.statusMessage.textContent = "Tayyor bo'lganingizda \"Boshlash\" tugmasini bosing";
-        elements.statusMessage.className = "text-xl font-bold text-center text-white mb-6 p-3 rounded-lg";
+        elements.statusMessage.className = "text-lg font-medium text-center text-gray-700 mb-6 p-3 bg-gray-50 rounded-lg";
     }
 
     // Musiqani yoqish/o'chirish
@@ -379,29 +377,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (gameConfig.musicEnabled) {
             elements.musicIcon.className = 'fas fa-volume-up';
-            elements.backgroundMusic.play();
-        } else {
-            elements.musicIcon.className = 'fas fa-volume-mute';
-            elements.backgroundMusic.pause();
-        }
-    }
+           elements.backgroundMusic.play();
+       } else {
+           elements.musicIcon.className = 'fas fa-volume-mute';
+           elements.backgroundMusic.pause();
+       }
+   }
 
-    // Event listeners
-    elements.startButton.addEventListener('click', startGame);
-    elements.restartButton.addEventListener('click', restartGame);
-    elements.musicToggle.addEventListener('click', toggleMusic);
+   // Event listeners
+   elements.startButton.addEventListener('click', startGame);
+   elements.restartButton.addEventListener('click', restartGame);
+   elements.musicToggle.addEventListener('click', toggleMusic);
 
-    // Dastlabki sozlash
-    createGrid();
-    updateDisplay();
-    loadUserStats();
+   // Dastlabki sozlash
+   createGrid();
+   updateDisplay();
+   loadUserStats();
 
-    // Quyidagi qator bilan brauzerning o'z xususiyatlari bilan o'yinni ochib olishi oldini olamiz
-    document.addEventListener('keydown', function (e) {
-        if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) ||
-            (e.key === 'F12')) {
-            e.preventDefault();
-        }
-    });
+   // Quyidagi qator bilan brauzerning o'z xususiyatlari bilan o'yinni ochib olishi oldini olamiz
+   document.addEventListener('keydown', function (e) {
+       if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) ||
+           (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) ||
+           (e.key === 'F12')) {
+           e.preventDefault();
+       }
+   });
 });

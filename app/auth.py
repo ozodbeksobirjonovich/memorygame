@@ -1,20 +1,14 @@
 from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import secrets
 from passlib.context import CryptContext
-from app.models import TokenData
-import aiosqlite
-from app.database import get_db
+from fastapi import Depends, HTTPException, Request, status
+from app.models import User, Session
+import uuid
 
 # Security constants
-SECRET_KEY = "YOUR_SECRET_KEY_HERE"  # In production, use a proper secret key
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+SESSION_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -22,44 +16,58 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-async def get_user(username: str, db):
-    async with db.execute("SELECT * FROM users WHERE username = ?", (username,)) as cursor:
-        user = await cursor.fetchone()
-        if user:
-            return dict(user)
-    return None
+def get_user(username):
+    try:
+        return User.get(User.username == username)
+    except User.DoesNotExist:
+        return None
 
-async def authenticate_user(username: str, password: str, db):
-    user = await get_user(username, db)
+def authenticate_user(username, password):
+    user = get_user(username)
     if not user:
         return False
-    if not verify_password(password, user["password"]):
+    if not verify_password(password, user.password):
         return False
     return user
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-async def get_current_user(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
+def create_session(user):
+    # Generate random session id
+    session_id = str(uuid.uuid4())
+    expiry = datetime.now() + timedelta(days=SESSION_EXPIRE_DAYS)
     
-    user = await get_user(username=token_data.username, db=db)
-    if user is None:
-        raise credentials_exception
-    return user
+    # Delete any existing sessions for this user
+    Session.delete().where(Session.user == user).execute()
+    
+    # Create new session
+    session = Session.create(
+        session_id=session_id,
+        user=user,
+        expiry=expiry
+    )
+    
+    return session_id
+
+def get_current_user(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
+    try:
+        session = Session.get(Session.session_id == session_id)
+        if not session.is_valid():
+            # Delete expired session
+            session.delete_instance()
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session expired"
+            )
+        
+        return session.user
+    except Session.DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid session"
+        )

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,42 +8,50 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
-<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-xl p-8 m-4">
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 m-4">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-white mb-2">Memory Game</h1>
-            <p class="text-blue-200">Tizimga kirish</p>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Memory Game</h1>
+            <p class="text-gray-600">Tizimga kirish</p>
         </div>
-        
-        <div id="error-message" class="hidden bg-red-500 bg-opacity-80 text-white p-3 rounded-lg mb-4 text-center"></div>
-        
+
+        <div id="error-message" class="hidden bg-red-500 text-white p-3 rounded-md mb-4 text-center"></div>
+
         <form id="login-form" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-medium text-blue-200">Foydalanuvchi nomi</label>
-                <input type="text" id="username" name="username" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <label for="username" class="block text-sm font-medium text-gray-700">Foydalanuvchi nomi</label>
+                <input type="text" id="username" name="username"
+                    class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
             </div>
-            
+
             <div>
-                <label for="password" class="block text-sm font-medium text-blue-200">Parol</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-3 bg-blue-800 bg-opacity-40 border border-blue-700 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <label for="password" class="block text-sm font-medium text-gray-700">Parol</label>
+                <input type="password" id="password" name="password"
+                    class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
             </div>
-            
+
             <div>
-                <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg transition transform hover:scale-105">
+                <button type="submit"
+                    class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition">
                     Kirish
                 </button>
             </div>
         </form>
-        
+
         <div class="mt-6 text-center">
-            <p class="text-blue-200">Hisobingiz yo'qmi? <a href="/register" class="text-purple-400 hover:text-purple-300 font-medium">Ro'yxatdan o'ting</a></p>
+            <p class="text-gray-600">Hisobingiz yo'qmi? <a href="/register"
+                    class="text-blue-600 hover:text-blue-800 font-medium">Ro'yxatdan o'ting</a></p>
         </div>
-        
+
         <div class="mt-8 text-center">
-            <a href="/" class="text-blue-300 hover:text-blue-200 font-medium">&larr; Bosh sahifaga qaytish</a>
+            <a href="/" class="text-gray-500 hover:text-gray-700 font-medium">&larr; Bosh sahifaga qaytish</a>
         </div>
     </div>
-    
+
     <script src="/static/js/auth.js"></script>
 </body>
+
 </html>

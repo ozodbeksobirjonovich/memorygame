@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('password', password);
             
             try {
-                const response = await fetch('/token', {
+                const response = await fetch('/login', {
                     method: 'POST',
                     body: formData
                 });
@@ -22,10 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Token va foydalanuvchi ma'lumotlarini saqlash
-                    localStorage.setItem('token', data.access_token);
-                    localStorage.setItem('user_id', data.user_id);
-                    
                     // O'yin sahifasiga o'tish
                     window.location.href = '/game';
                 } else {

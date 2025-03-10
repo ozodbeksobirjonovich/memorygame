@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const messageDiv = document.createElement('div');
         messageDiv.className = type === 'success' 
-            ? 'bg-green-500 text-white p-4 rounded-lg' 
-            : 'bg-red-500 text-white p-4 rounded-lg';
+            ? 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md' 
+            : 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md';
         messageDiv.textContent = text;
         
         messageContainer.appendChild(messageDiv);
