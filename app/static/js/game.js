@@ -98,13 +98,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('/api/get-progress');
             if (response.ok) {
                 const data = await response.json();
-                
+
                 if (data.status === 'success' && data.has_progress) {
                     gameConfig.hasProgress = true;
                     gameConfig.progressData = data.progress;
-                    
-                    // Show continue button
-                    elements.continueButton.classList.remove('hidden');
+
+                    // Continue tugmasini faqat o'yin xatolik bilan tugamagan bo'lsagina ko'rsatish
+                    if (localStorage.getItem('memoryGameEndedWithError') !== 'true') {
+                        elements.continueButton.classList.remove('hidden');
+                    }
+
+                    // Use coin tugmasini har doim ko'rsatish
                     elements.useCoinButton.classList.remove('hidden');
                 }
             }
@@ -116,18 +120,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load saved game
     function loadSavedGame() {
         if (!gameConfig.progressData) return;
-        
+
         gameConfig.currentLevel = gameConfig.progressData.level;
         gameConfig.currentStage = gameConfig.progressData.stage;
         gameConfig.score = gameConfig.progressData.score;
         gameConfig.sequence = gameConfig.progressData.sequence;
-        
+
         createGrid();
         updateDisplay();
-        
+
         elements.statusMessage.textContent = "Saqlangan o'yin yuklandi. Davom etishga tayyormisiz?";
         elements.statusMessage.className = "text-lg font-medium text-center text-blue-400 mb-6 p-4 bg-blue-900/30 rounded-lg border border-blue-700";
-        
+
         startGame(true); // true - continue from saved game
     }
 
@@ -240,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
         elements.timerProgress.style.width = '100%';
         elements.timerProgress.classList.remove('countdown-active');
         void elements.timerProgress.offsetWidth; // Trigger reflow
-        
+
         // Set animation duration
         elements.timerProgress.style.animationDuration = `${gameConfig.timeLeft}s`;
         elements.timerProgress.classList.add('countdown-active');
@@ -316,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (gameConfig.currentStage > gameConfig.stagesPerLevel) {
                 gameConfig.currentStage = 1;
                 gameConfig.currentLevel++;
-                
+
                 // O'yin tugagan
                 if (gameConfig.currentLevel > gameConfig.maxLevel) {
                     gameWin();
@@ -411,18 +415,18 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
                 // Update coin display
                 elements.coinDisplay.textContent = data.remaining_coins;
-                
+
                 // If we have saved progress, load it
                 if (gameConfig.hasProgress) {
                     loadSavedGame();
-                    
+
                     // Close modal if it's open
                     elements.gameOverModal.classList.add('hidden');
-                    
+
                     // Show success message
                     const coinUsedMessage = document.createElement('div');
                     coinUsedMessage.className = 'fixed top-20 right-10 bg-green-900/70 text-green-300 px-4 py-2 rounded-lg z-50';
@@ -460,10 +464,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // Save game progress for continue feature
         saveGameProgress();
 
+        // O'yin xatolik bilan tugaganini belgilaydigan flag
+        localStorage.setItem('memoryGameEndedWithError', 'true');
+
         elements.statusMessage.textContent = message;
         elements.statusMessage.className = "text-lg font-medium text-center text-red-400 mb-6 p-4 bg-red-900/30 rounded-lg border border-red-700";
 
         elements.startButton.classList.add('hidden');
+        elements.continueButton.classList.add('hidden'); // Continue tugmasini aniq yashirish
         elements.restartButton.classList.remove('hidden');
         elements.useCoinButton.classList.remove('hidden');
 
@@ -547,6 +555,8 @@ document.addEventListener('DOMContentLoaded', function () {
         gameConfig.gameOver = false;
         gameConfig.canPlayerClick = false;
         gameConfig.gameStartTime = Date.now();
+
+        localStorage.removeItem('memoryGameEndedWithError');
 
         elements.statusMessage.textContent = "Tayyor bo'ling...";
         elements.statusMessage.className = "text-lg font-medium text-center text-blue-400 mb-6 p-4 bg-blue-900/30 rounded-lg border border-blue-700";
