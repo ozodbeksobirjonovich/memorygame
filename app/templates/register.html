@@ -1,46 +1,85 @@
+<!-- app/templates/register.html -->
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ro'yxatdan o'tish - Memory Game</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Ro'yxatdan o'tish - Memory Chempion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <!-- app/templates/register.html continued -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 py-12">
-    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8 m-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen py-12">
+    <div class="max-w-2xl mx-auto bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-8 m-4">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Memory Game</h1>
-            <p class="text-gray-600">Ro'yxatdan o'tish</p>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500 mb-2">
+                Memory<span class="text-blue-400">Chempion</span>
+            </h1>
+            <p class="text-gray-400">Ro'yxatdan o'tish</p>
         </div>
         
-        <div id="error-message" class="hidden bg-red-500 text-white p-3 rounded-md mb-4 text-center"></div>
+        <div id="error-message" class="hidden bg-red-900/30 border border-red-700 text-red-400 p-3 rounded-lg mb-4 text-center"></div>
         
         <form id="register-form" class="space-y-6" enctype="multipart/form-data">
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700">Foydalanuvchi nomi</label>
-                    <input type="text" id="username" name="username" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="username" class="block text-sm font-medium text-gray-400 mb-1">Foydalanuvchi nomi</label>
+                    <input type="text" id="username" name="username" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required>
                 </div>
                 
                 <div>
-                    <label for="full_name" class="block text-sm font-medium text-gray-700">To'liq ism</label>
-                    <input type="text" id="full_name" name="full_name" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="full_name" class="block text-sm font-medium text-gray-400 mb-1">To'liq ism</label>
+                    <input type="text" id="full_name" name="full_name" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required>
                 </div>
                 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Parol</label>
-                    <input type="password" id="password" name="password" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Parol</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required>
                 </div>
                 
                 <div>
-                    <label for="birthdate" class="block text-sm font-medium text-gray-700">Tug'ilgan sana</label>
-                    <input type="date" id="birthdate" name="birthdate" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="birthdate" class="block text-sm font-medium text-gray-400 mb-1">Tug'ilgan sana</label>
+                    <input type="date" id="birthdate" name="birthdate" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required>
                 </div>
                 
                 <div>
-                    <label for="region" class="block text-sm font-medium text-gray-700">Viloyat</label>
-                    <select id="region" name="region" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="region" class="block text-sm font-medium text-gray-400 mb-1">Viloyat</label>
+                    <select id="region" name="region" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required>
                         <option value="">Viloyatni tanlang</option>
                         {% for region_name in regions.keys() %}
                             <option value="{{ region_name }}">{{ region_name }}</option>
@@ -49,34 +88,45 @@
                 </div>
                 
                 <div>
-                    <label for="district" class="block text-sm font-medium text-gray-700">Tuman/Shahar</label>
-                    <select id="district" name="district" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required disabled>
+                    <label for="district" class="block text-sm font-medium text-gray-400 mb-1">Tuman/Shahar</label>
+                    <select id="district" name="district" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200" required disabled>
                         <option value="">Avval viloyatni tanlang</option>
                     </select>
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label for="avatar" class="block text-sm font-medium text-gray-700">Profil rasmi (ixtiyoriy)</label>
-                    <input type="file" id="avatar" name="avatar" accept="image/*" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="avatar" class="block text-sm font-medium text-gray-400 mb-1">Profil rasmi (ixtiyoriy)</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200">
                 </div>
             </div>
             
             <div>
-                <button type="submit" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition">
-                    Ro'yxatdan o'tish
+                <button type="submit" class="w-full py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition flex items-center justify-center">
+                    <i class="fas fa-user-plus mr-2"></i> Ro'yxatdan o'tish
                 </button>
             </div>
         </form>
         
         <div class="mt-6 text-center">
-            <p class="text-gray-600">Allaqachon hisobingiz bormi? <a href="/login" class="text-blue-600 hover:text-blue-800 font-medium">Kirish</a></p>
+            <p class="text-gray-400">Allaqachon hisobingiz bormi? <a href="/login" class="text-blue-400 hover:text-blue-300 font-medium">Kirish</a></p>
         </div>
         
         <div class="mt-8 text-center">
-            <a href="/" class="text-gray-500 hover:text-gray-700 font-medium">&larr; Bosh sahifaga qaytish</a>
+            <a href="/" class="text-gray-500 hover:text-gray-400 font-medium flex items-center justify-center">
+                <i class="fas fa-arrow-left mr-2"></i> Bosh sahifaga qaytish
+            </a>
         </div>
     </div>
     
+    <script>
+        // Tema almashtirish qismi
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const regionSelect = document.getElementById('region');

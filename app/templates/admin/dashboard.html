@@ -1,0 +1,182 @@
+<!-- app/templates/admin/dashboard.html -->
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Memory Champion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0">
+            <div class="p-4 border-b border-gray-700">
+                <div class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                    Memory<span class="text-blue-400">Champion</span>
+                </div>
+                <p class="text-gray-400 text-sm mt-1">Administrator Panel</p>
+            </div>
+            
+            <nav class="mt-4">
+                <a href="/admin" class="flex items-center px-4 py-3 text-gray-300 bg-gray-750 border-l-4 border-purple-500">
+                    <i class="fas fa-tachometer-alt mr-3 text-purple-400"></i>
+                    Dashboard
+                </a>
+                <a href="/admin/users" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-users mr-3 text-gray-400"></i>
+                    Foydalanuvchilar
+                </a>
+                <a href="/admin/results" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-trophy mr-3 text-gray-400"></i>
+                    Natijalar
+                </a>
+                <a href="/game" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-gamepad mr-3 text-gray-400"></i>
+                    O'yinga qaytish
+                </a>
+                <a href="/logout" class="flex items-center px-4 py-3 text-red-400 hover:bg-gray-750 hover:border-l-4 hover:border-red-500">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Chiqish
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto">
+            <div class="container mx-auto px-6 py-8">
+                <h1 class="text-3xl font-bold text-white mb-6">Dashboard</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-300">Foydalanuvchilar</h2>
+                            <span class="p-2 bg-blue-900/30 rounded-lg">
+                                <i class="fas fa-users text-blue-500"></i>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-blue-400">{{ user_count }}</p>
+                        <p class="text-gray-400 mt-2 text-sm">Ro'yxatdan o'tgan foydalanuvchilar</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-300">O'yinlar</h2>
+                            <span class="p-2 bg-purple-900/30 rounded-lg">
+                                <i class="fas fa-gamepad text-purple-500"></i>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-purple-400">{{ game_count }}</p>
+                        <p class="text-gray-400 mt-2 text-sm">O'ynalgan o'yinlar soni</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-300">Sana</h2>
+                            <span class="p-2 bg-green-900/30 rounded-lg">
+                                <i class="fas fa-calendar text-green-500"></i>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-green-400">12.03.2025</p>
+                        <p class="text-gray-400 mt-2 text-sm">Bugungi sana</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
+                    <h2 class="text-xl font-bold text-white mb-6">Eng yuqori natijalar</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-700">
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Foydalanuvchi</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Ball</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Coinlar</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in top_users %}
+                                <tr class="border-b border-gray-700">
+                                    <td class="py-3 px-4 text-sm text-gray-300">{{ user.full_name }}</td>
+                                    <td class="py-3 px-4 text-sm text-green-400">{{ user.score }}</td>
+                                    <td class="py-3 px-4 text-sm text-yellow-400">{{ user.coins }}</td>
+                                    <td class="py-3 px-4 text-sm">
+                                        <a href="/admin/user/{{ user.user_id }}" class="text-blue-400 hover:text-blue-300">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                        <h2 class="text-xl font-bold text-white mb-4">Tizim haqida</h2>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Platforma:</span>
+                                <span class="text-gray-300">Memory Champion v1.0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Oxirgi yangilanish:</span>
+                                <span class="text-gray-300">12.03.2025</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Ishlab chiqaruvchi:</span>
+                                <span class="text-gray-300">Ozodbek Sobirjonovich</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                        <h2 class="text-xl font-bold text-white mb-4">Tezkor harakatlar</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="/admin/users" class="bg-gray-700 hover:bg-gray-650 rounded-lg p-4 text-center transition">
+                                <i class="fas fa-users text-blue-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-gray-300">Foydalanuvchilarni boshqarish</p>
+                            </a>
+                            <a href="/admin/results" class="bg-gray-700 hover:bg-gray-650 rounded-lg p-4 text-center transition">
+                                <i class="fas fa-trophy text-yellow-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-gray-300">Natijalarni ko'rish</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

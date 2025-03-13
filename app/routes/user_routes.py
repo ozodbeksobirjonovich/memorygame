@@ -1,3 +1,4 @@
+# app/routes/user_routes.py
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates

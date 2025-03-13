@@ -1,0 +1,284 @@
+<!-- app/templates/admin/user_edit.html -->
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foydalanuvchini tahrirlash - Memory Champion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0">
+            <div class="p-4 border-b border-gray-700">
+                <div class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                    Memory<span class="text-blue-400">Champion</span>
+                </div>
+                <p class="text-gray-400 text-sm mt-1">Administrator Panel</p>
+            </div>
+            
+            <nav class="mt-4">
+                <a href="/admin" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-purple-500">
+                    <i class="fas fa-tachometer-alt mr-3 text-gray-400"></i>
+                    Dashboard
+                </a>
+                <a href="/admin/users" class="flex items-center px-4 py-3 text-gray-300 bg-gray-750 border-l-4 border-blue-500">
+                    <i class="fas fa-users mr-3 text-blue-400"></i>
+                    Foydalanuvchilar
+                </a>
+                <a href="/admin/results" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-trophy mr-3 text-gray-400"></i>
+                    Natijalar
+                </a>
+                <a href="/game" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-gamepad mr-3 text-gray-400"></i>
+                    O'yinga qaytish
+                </a>
+                <a href="/logout" class="flex items-center px-4 py-3 text-red-400 hover:bg-gray-750 hover:border-l-4 hover:border-red-500">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Chiqish
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto">
+            <div class="container mx-auto px-6 py-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-3xl font-bold text-white">Foydalanuvchini tahrirlash</h1>
+                    <a href="/admin/users" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Orqaga
+                    </a>
+                </div>
+                
+                <div id="message-container" class="mb-6 hidden"></div>
+                
+                <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/3">
+                            <div class="text-center">
+                                <img src="/static/uploads/{{ edit_user.avatar }}" alt="{{ edit_user.full_name }}"
+                                    class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-2 border-gray-700">
+                                <h2 class="text-xl font-bold text-white">{{ edit_user.full_name }}</h2>
+                                <p class="text-gray-400">@{{ edit_user.username }}</p>
+                            </div>
+                            
+                            <div class="mt-6 space-y-2">
+                                <div class="bg-gray-700/50 p-3 rounded-lg">
+                                    <span class="text-gray-400 text-sm">ID:</span>
+                                    <p class="text-gray-300 font-medium">{{ edit_user.id }}</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 p-3 rounded-lg">
+                                    <span class="text-gray-400 text-sm">Tug'ilgan sana:</span>
+                                    <p class="text-gray-300 font-medium">{{ edit_user.birthdate }}</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 p-3 rounded-lg">
+                                    <span class="text-gray-400 text-sm">Viloyat:</span>
+                                    <p class="text-gray-300 font-medium">{{ edit_user.region }}</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 p-3 rounded-lg">
+                                    <span class="text-gray-400 text-sm">Tuman:</span>
+                                    <p class="text-gray-300 font-medium">{{ edit_user.district }}</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 p-3 rounded-lg">
+                                    <span class="text-gray-400 text-sm">Ro'yxatdan o'tgan sana:</span>
+                                    <p class="text-gray-300 font-medium">{{ edit_user.created_at.strftime('%Y-%m-%d') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="md:w-2/3">
+                            <form id="user-edit-form" class="space-y-6">
+                                <div>
+                                    <label for="full_name" class="block text-sm font-medium text-gray-400 mb-1">To'liq ism</label>
+                                    <input type="text" id="full_name" name="full_name" value="{{ edit_user.full_name }}"
+                                        class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200">
+                                </div>
+                                
+                                <div>
+                                    <label for="coins" class="block text-sm font-medium text-gray-400 mb-1">Coinlar</label>
+                                    <input type="number" id="coins" name="coins" value="{{ edit_user.coins }}" min="0"
+                                        class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200">
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="is_admin" name="is_admin" {% if edit_user.is_admin %}checked{% endif %}
+                                        class="h-5 w-5 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-0">
+                                    <label for="is_admin" class="ml-2 text-sm font-medium text-gray-300">
+                                        Administrator huquqlarini berish
+                                    </label>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-gray-700">
+                                    <h3 class="text-lg font-medium text-white mb-4">Parolni o'zgartirish</h3>
+                                    
+                                    <div>
+                                        <label for="new_password" class="block text-sm font-medium text-gray-400 mb-1">Yangi parol</label>
+                                        <input type="password" id="new_password" name="new_password" placeholder="Yangi parol kiritish uchun to'ldiring"
+                                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200">
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
+                                        <i class="fas fa-save mr-2"></i> Saqlash
+                                    </button>
+                                    
+                                    <button type="button" onclick="confirmDelete('{{ edit_user.id }}', '{{ edit_user.full_name }}')" 
+                                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition">
+                                        <i class="fas fa-trash mr-2"></i> O'chirish
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-xl border border-gray-700 p-8 max-w-md w-full mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 rounded-full bg-red-900/30 mx-auto flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Foydalanuvchini o'chirish</h2>
+                <p class="text-gray-400">Siz rostdan ham <span id="delete-user-name" class="text-red-400 font-bold"></span> foydalanuvchisini o'chirmoqchimisiz?</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <button id="confirm-delete-button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition">
+                    O'chirish
+                </button>
+                <button onclick="closeDeleteModal()" class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition">
+                    Bekor qilish
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const userEditForm = document.getElementById('user-edit-form');
+        const messageContainer = document.getElementById('message-container');
+        const userId = '{{ edit_user.id }}';
+        
+        userEditForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(userEditForm);
+            
+            // Handle checkbox
+            formData.set('is_admin', document.getElementById('is_admin').checked);
+            
+            try {
+                const response = await fetch(`/admin/user/${userId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('success', 'Foydalanuvchi muvaffaqiyatli yangilandi');
+                } else {
+                    showMessage('error', data.detail || 'Foydalanuvchini yangilashda xatolik');
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                showMessage('error', 'Foydalanuvchini yangilashda xatolik');
+            }
+        });
+        
+        function showMessage(type, text) {
+            messageContainer.innerHTML = '';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'success' 
+                ? 'bg-green-900/30 border border-green-700 text-green-400 p-4 rounded-lg' 
+                : 'bg-red-900/30 border border-red-700 text-red-400 p-4 rounded-lg';
+            messageDiv.textContent = text;
+            
+            messageContainer.appendChild(messageDiv);
+            messageContainer.classList.remove('hidden');
+            
+            // 3 sekunddan so'ng xabarni o'chirish
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 3000);
+        }
+        
+        let userIdToDelete = null;
+        
+        function confirmDelete(userId, userName) {
+            userIdToDelete = userId;
+            document.getElementById('delete-user-name').textContent = userName;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            userIdToDelete = null;
+        }
+        
+        document.getElementById('confirm-delete-button').addEventListener('click', async function() {
+            if (!userIdToDelete) return;
+            
+            try {
+                const response = await fetch(`/admin/user/${userIdToDelete}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Redirect back to users list
+                    window.location.href = '/admin/users';
+                } else {
+                    showMessage('error', data.detail || 'Foydalanuvchini o\'chirishda xatolik');
+                    closeDeleteModal();
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showMessage('error', 'Foydalanuvchini o\'chirishda xatolik');
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

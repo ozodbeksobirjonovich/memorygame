@@ -1,3 +1,4 @@
+# app/database.py
 from peewee import *
 import json
 from pathlib import Path
@@ -5,7 +6,8 @@ import os
 from datetime import datetime
 
 # Database configuration
-db = SqliteDatabase('memory_game.db')
+db_path = Path("memory_game.db")
+db = SqliteDatabase(db_path)
 
 # Viloyatlar va tumanlar ma'lumotlari
 def load_regions():
@@ -16,9 +18,9 @@ def load_regions():
     return {}
 
 def create_tables():
-    from app.models import User, GameResult, Session
+    from app.models import User, GameResult, Session, GameProgress
     
-    db.create_tables([User, GameResult, Session])
+    db.create_tables([User, GameResult, Session, GameProgress])
     
     # Create regions data
     regions_data = Path("app/static/data")

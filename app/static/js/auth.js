@@ -1,3 +1,4 @@
+// app/static/js/auth.js
 document.addEventListener('DOMContentLoaded', function() {
     // Login shakli
     const loginForm = document.getElementById('login-form');
@@ -22,8 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // O'yin sahifasiga o'tish
-                    window.location.href = '/game';
+                    // Check if admin and redirect accordingly
+                    if (data.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/game';
+                    }
                 } else {
                     errorMessage.textContent = data.detail || 'Login xatosi';
                     errorMessage.classList.remove('hidden');
@@ -75,7 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (errorMessage) {
             errorMessage.textContent = 'Ro\'yxatdan muvaffaqiyatli o\'tdingiz. Endi tizimga kirishingiz mumkin.';
             errorMessage.classList.remove('hidden');
-            errorMessage.classList.add('bg-green-500');
+            errorMessage.classList.add('bg-green-900/30');
+            errorMessage.classList.add('border-green-700');
+            errorMessage.classList.add('text-green-400');
         }
     }
 });

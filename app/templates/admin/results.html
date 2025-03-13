@@ -1,0 +1,151 @@
+<!-- app/templates/admin/results.html -->
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natijalar - Memory Champion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0">
+            <div class="p-4 border-b border-gray-700">
+                <div
+                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                    Memory<span class="text-blue-400">Champion</span>
+                </div>
+                <p class="text-gray-400 text-sm mt-1">Administrator Panel</p>
+            </div>
+
+            <nav class="mt-4">
+                <a href="/admin"
+                    class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-purple-500">
+                    <i class="fas fa-tachometer-alt mr-3 text-gray-400"></i>
+                    Dashboard
+                </a>
+                <a href="/admin/users"
+                    class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-users mr-3 text-gray-400"></i>
+                    Foydalanuvchilar
+                </a>
+                <!-- app/templates/admin/results.html continued -->
+                <a href="/admin/results"
+                    class="flex items-center px-4 py-3 text-gray-300 bg-gray-750 border-l-4 border-yellow-500">
+                    <i class="fas fa-trophy mr-3 text-yellow-400"></i>
+                    Natijalar
+                </a>
+                <a href="/game"
+                    class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-750 hover:border-l-4 hover:border-blue-500">
+                    <i class="fas fa-gamepad mr-3 text-gray-400"></i>
+                    O'yinga qaytish
+                </a>
+                <a href="/logout"
+                    class="flex items-center px-4 py-3 text-red-400 hover:bg-gray-750 hover:border-l-4 hover:border-red-500">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Chiqish
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto">
+            <div class="container mx-auto px-6 py-8">
+                <h1 class="text-3xl font-bold text-white mb-6">O'yin natijalari</h1>
+
+                <!-- Search form -->
+                <div class="mb-6 bg-gray-800 rounded-xl border border-gray-700 p-6">
+                    <form action="/admin/results" method="get" class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" name="search" value="{{ search or '' }}"
+                                placeholder="Foydalanuvchi ismi bo'yicha qidirish..."
+                                class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200">
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">
+                                <i class="fas fa-search mr-2"></i>Qidirish
+                            </button>
+                            <a href="/admin/results"
+                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results list -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-750 border-b border-gray-700">
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">ID</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Foydalanuvchi</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Ball</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Daraja</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Bosqich</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">O'lcham</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Vaqt (sek)</th>
+                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Sana</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr class="border-b border-gray-700 hover:bg-gray-750">
+                                    <td class="py-3 px-4 text-sm text-gray-300">{{ result.id }}</td>
+                                    <td class="py-3 px-4 text-sm">
+                                        <a href="/admin/user/{{ result.user_id }}"
+                                            class="text-blue-400 hover:text-blue-300">{{ result.full_name }}</a>
+                                        <span class="text-gray-500 text-xs block">@{{ result.username }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-yellow-400 font-bold">{{ result.score }}</td>
+                                    <td class="py-3 px-4 text-sm text-purple-400">{{ result.level }}</td>
+                                    <td class="py-3 px-4 text-sm text-gray-300">{{ result.stage }}</td>
+                                    <td class="py-3 px-4 text-sm text-blue-400">{{ result.grid_size }}×{{
+                                        result.grid_size }}</td>
+                                    <td class="py-3 px-4 text-sm text-gray-300">{{ result.duration }}</td>
+                                    <td class="py-3 px-4 text-sm text-gray-400">{{ result.date }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

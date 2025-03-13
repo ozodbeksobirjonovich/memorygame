@@ -1,153 +1,489 @@
+<!-- app/templates/game.html -->
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>O'yin - Memory Game</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Memory Chempion - Brain Training Game</title>
+    <!-- Tailwind CSS va dark mode qo'llab-quvvatlash -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'glow': 'glow 1.5s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px #7c3aed' },
+                            '100%': { boxShadow: '0 0 20px #7c3aed, 0 0 30px #a78bfa' }
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .memory-card {
+            perspective: 1000px;
+            transition: transform 0.3s;
+        }
+        
+        .memory-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .memory-card.active {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        /* Progress bar animation */
+        @keyframes countdown {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        .countdown-active {
+            animation: countdown linear forwards;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold text-blue-600">Memory Game</a>
-            
-            <div class="flex items-center space-x-4">
-                <button id="music-toggle" class="text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">
-                    <i class="fas fa-volume-mute" id="music-icon"></i>
-                </button>
+<body class="bg-gray-900 text-gray-100 min-h-screen transition-all duration-300">
+    <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                        Memory<span class="text-blue-400">Chempion</span>
+                    </span>
+                </a>
                 
-                <div class="flex items-center">
-                    <img src="/static/uploads/{{ user.avatar }}" alt="{{ user.full_name }}" class="w-8 h-8 rounded-full mr-2 object-cover border border-gray-200">
-                    <span class="text-gray-700 font-medium">{{ user.full_name }}</span>
-                </div>
-                
-                <div class="flex space-x-2">
-                    <a href="/profile" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 text-sm">
-                        Profil
-                    </a>
-                    <a href="/leaderboard" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 text-sm">
-                        Natijalar
-                    </a>
+                <div class="flex items-center space-x-5">
+                    <div class="flex items-center text-yellow-500 px-3 py-1 bg-yellow-900/30 rounded-full">
+                        <i class="fas fa-coins mr-2"></i>
+                        <span id="coin-display" class="font-semibold">{{ user.coins }}</span>
+                    </div>
+                    
+                    <button id="music-toggle" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition">
+                        <i class="fas fa-volume-mute" id="music-icon"></i>
+                    </button>
+                    
+                    <div class="relative group">
+                        <div class="flex items-center space-x-2 cursor-pointer p-1 rounded-lg hover:bg-gray-700">
+                            <img src="/static/uploads/{{ user.avatar }}" alt="{{ user.full_name }}" 
+                                class="w-9 h-9 rounded-full object-cover border-2 border-purple-500">
+                            <span class="font-medium">{{ user.full_name }}</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                        </div>
+                        
+                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 hidden group-hover:block">
+                            <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-700">
+                                <i class="fas fa-user mr-2"></i> Profil
+                            </a>
+                            <a href="/leaderboard" class="block px-4 py-2 text-sm hover:bg-gray-700">
+                                <i class="fas fa-trophy mr-2"></i> Natijalar
+                            </a>
+                            {% if user.is_admin %}
+                            <a href="/admin" class="block px-4 py-2 text-sm hover:bg-gray-700">
+                                <i class="fas fa-cog mr-2"></i> Admin panel
+                            </a>
+                            {% endif %}
+                            <a href="/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Chiqish
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
-        <div id="user-stats" class="bg-white rounded-lg shadow-sm p-4 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <h3 class="text-blue-600 text-sm font-medium">Eng yuqori ball</h3>
-                <p id="best-score" class="text-gray-800 text-2xl font-bold">0</p>
+        <!-- Statistika paneli -->
+        <div id="user-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 transition hover:bg-gray-750 hover:border-gray-600">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-400 text-sm">Eng yuqori ball</h3>
+                    <span class="p-2 bg-blue-900/30 rounded-lg">
+                        <i class="fas fa-star text-yellow-500"></i>
+                    </span>
+                </div>
+                <p id="best-score" class="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600">0</p>
             </div>
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <h3 class="text-blue-600 text-sm font-medium">Erishilgan daraja</h3>
-                <p id="max-level" class="text-gray-800 text-2xl font-bold">0</p>
+            
+            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 transition hover:bg-gray-750 hover:border-gray-600">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-400 text-sm">Erishilgan daraja</h3>
+                    <span class="p-2 bg-purple-900/30 rounded-lg">
+                        <i class="fas fa-trophy text-purple-500"></i>
+                    </span>
+                </div>
+                <p id="max-level" class="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">0</p>
             </div>
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <h3 class="text-blue-600 text-sm font-medium">Eng katta o'lcham</h3>
-                <p id="max-grid-size" class="text-gray-800 text-2xl font-bold">0×0</p>
+            
+            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 transition hover:bg-gray-750 hover:border-gray-600">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-400 text-sm">Eng katta o'lcham</h3>
+                    <span class="p-2 bg-green-900/30 rounded-lg">
+                        <i class="fas fa-th text-green-500"></i>
+                    </span>
+                </div>
+                <p id="max-grid-size" class="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">0×0</p>
             </div>
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <h3 class="text-blue-600 text-sm font-medium">Jami o'yinlar</h3>
-                <p id="games-played" class="text-gray-800 text-2xl font-bold">0</p>
+            
+            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 transition hover:bg-gray-750 hover:border-gray-600">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-400 text-sm">Jami o'yinlar</h3>
+                    <span class="p-2 bg-red-900/30 rounded-lg">
+                        <i class="fas fa-gamepad text-red-500"></i>
+                    </span>
+                </div>
+                <p id="games-played" class="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">0</p>
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="w-full md:w-3/4 bg-white rounded-lg shadow-sm p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center">
-                        <div class="text-2xl font-bold text-gray-800">
-                            <span id="grid-size">3×3</span>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- O'yin maydoni -->
+            <div class="w-full lg:w-3/4">
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="p-6 relative">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
+                                    <span id="grid-size">3×3</span>
+                                </div>
+                                <div class="px-3 py-1.5 bg-purple-900/30 rounded-lg text-purple-300 flex items-center">
+                                    <i class="fas fa-layer-group mr-2"></i>
+                                    <span>Daraja: <span id="level" class="font-semibold">1</span></span>
+                                    <span class="mx-2">•</span>
+                                    <span>Bosqich: <span id="stage" class="font-semibold">1</span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="px-3 py-1.5 bg-indigo-900/30 rounded-lg text-indigo-300 flex items-center">
+                                    <i class="fas fa-star mr-2"></i> Ball: <span id="score" class="font-semibold ml-1">0</span>
+                                </div>
+                                <div class="px-3 py-1.5 bg-red-900/30 rounded-lg text-red-300 flex items-center">
+                                    <i class="fas fa-hourglass-half mr-2"></i> Vaqt: <span id="timer" class="font-semibold ml-1">--</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-4 px-3 py-1 bg-blue-100 rounded-lg text-blue-800">
-                            Daraja: <span id="level">1</span> / Bosqich: <span id="stage">1</span>
+                        
+                        <!-- Progress bar -->
+                        <div id="timer-bar" class="w-full h-1.5 bg-gray-700 rounded-full mb-6 overflow-hidden">
+                            <div id="timer-progress" class="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
+                        </div>
+                        
+                        <div id="status-message" class="text-lg font-medium text-center mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                            <span class="text-white">Boshlash tugmasini bosing</span>
+                        </div>
+                        
+                        <div id="game-container" class="flex justify-center items-center min-h-[400px] mb-8 relative">
+                            <!-- O'yin maydoni shu yerda yaratiladi -->
+                            <!-- Animatsiyali platseholder -->
+                            <div class="grid grid-cols-3 gap-3 opacity-70">
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-100"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-200"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-300"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-400"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-500"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-600"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-700"></div>
+                                <div class="w-24 h-24 bg-gray-700 rounded-lg animate-pulse delay-800"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-4">
+                            <button id="start-button" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition flex items-center">
+                                <i class="fas fa-play mr-2"></i> Boshlash
+                            </button>
+                            <button id="continue-button" class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-lg transition hidden flex items-center">
+                                <i class="fas fa-redo mr-2"></i> Davom ettirish
+                            </button>
+                            <button id="restart-button" class="px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-medium rounded-lg transition hidden flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i> Qayta boshlash
+                            </button>
+                            <button id="use-coin-button" class="px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white font-medium rounded-lg transition hidden flex items-center">
+                                <i class="fas fa-coins mr-2"></i> Coin ishlatish (20)
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <div class="px-3 py-1 bg-purple-100 rounded-lg text-purple-800">
-                            Ball: <span id="score">0</span>
-                        </div>
-                        <div class="px-3 py-1 bg-red-100 rounded-lg text-red-800">
-                            Vaqt: <span id="timer">--</span>
+                </div>
+                
+                <!-- Natijalar jadvali -->
+                <!-- <div class="mt-8 bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-trophy text-yellow-500 mr-2"></i> So'nggi natijalaringiz
+                        </h2>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-700">
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Sana</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Daraja</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">O'lcham</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Ball</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-400">Vaqt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="results-table">
+                                    <tr class="border-b border-gray-700">
+                                        <td class="py-3 px-4 text-sm text-gray-300">12.03.2025</td>
+                                        <td class="py-3 px-4 text-sm text-purple-400">5</td>
+                                        <td class="py-3 px-4 text-sm text-blue-400">4×4</td>
+                                        <td class="py-3 px-4 text-sm text-green-400">750</td>
+                                        <td class="py-3 px-4 text-sm text-orange-400">01:35</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-sm text-gray-300">11.03.2025</td>
+                                        <td class="py-3 px-4 text-sm text-purple-400">3</td>
+                                        <td class="py-3 px-4 text-sm text-blue-400">3×3</td>
+                                        <td class="py-3 px-4 text-sm text-green-400">420</td>
+                                        <td class="py-3 px-4 text-sm text-orange-400">00:58</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-                
-                <div id="status-message" class="text-lg font-medium text-center text-gray-800 mb-6 p-3 bg-gray-100 rounded-lg">
-                    Boshlash tugmasini bosing
-                </div>
-                
-                <div id="game-container" class="flex justify-center items-center min-h-[300px] md:min-h-[400px] mb-6">
-                    <!-- O'yin maydoni shu yerda yaratiladi -->
-                </div>
-                
-                <div class="flex justify-center space-x-4">
-                    <button id="start-button" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition">
-                        Boshlash
-                    </button>
-                    <button id="restart-button" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition hidden">
-                        Qayta boshlash
-                    </button>
-                </div>
+                </div> -->
             </div>
             
-            <div class="w-full md:w-1/4">
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">O'yin qoidalari</h2>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">•</span>
-                            <span>Katakchalar ketma-ketlikda yonib o'chadi</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">•</span>
-                            <span>Yonib o'chgan katakchalarni ko'rsatilgan tartibda bosing</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">•</span>
-                            <span>Har 5 bosqichdan so'ng o'yin maydoni kattalashadi</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">•</span>
-                            <span>Xato qilsangiz, o'yin tugaydi</span>
-                        </li>
-                    </ul>
+            <!-- O'ng panel -->
+            <div class="w-full lg:w-1/4 space-y-8">
+                <!-- O'yinchi kartasi -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-900/40 to-purple-900/40 p-6">
+                        <div class="flex items-center gap-4">
+                            <img src="/static/uploads/{{ user.avatar }}" alt="{{ user.full_name }}" 
+                                class="w-16 h-16 rounded-full object-cover border-2 border-blue-500">
+                            <div>
+                                <h2 class="text-xl font-bold text-white">{{ user.full_name }}</h2>
+                                <p class="text-blue-400">Memory Master</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex items-center justify-between bg-gray-900/50 rounded-lg p-3">
+                            <span class="text-sm text-gray-400">Coin balansi:</span>
+                            <span class="text-yellow-400 font-bold flex items-center">
+                                <i class="fas fa-coins mr-2"></i> {{ user.coins }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Maslahatlar</h2>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <span class="text-gray-400 mr-2">•</span>
-                            <span>Katakchalarni guruhlarga bo'lib eslab qoling</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-gray-400 mr-2">•</span>
-                            <span>Ko'rsatilayotganda ovoz chiqarib sanang</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-gray-400 mr-2">•</span>
-                            <span>Har doim diqqatingizni jamlang</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-gray-400 mr-2">•</span>
-                            <span>Mantiqiy ketma-ketliklarni qidirishni sinab ko'ring</span>
-                        </li>
-                    </ul>
+                <!-- O'yin qoidalari paneli -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-book text-blue-500 mr-2"></i> O'yin qoidalari
+                        </h2>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <span class="text-blue-400 text-xs">1</span>
+                                </div>
+                                <span class="text-gray-300">Katakchalar ketma-ketlikda yonib o'chadi</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <span class="text-blue-400 text-xs">2</span>
+                                </div>
+                                <span class="text-gray-300">Yonib o'chgan katakchalarni ko'rsatilgan tartibda bosing</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <span class="text-blue-400 text-xs">3</span>
+                                </div>
+                                <span class="text-gray-300">Har 5 bosqichdan so'ng o'yin maydoni kattalashadi</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <span class="text-blue-400 text-xs">4</span>
+                                </div>
+                                <span class="text-gray-300">Xato qilsangiz, o'yin tugaydi</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Coin tizimi paneli -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-coins text-yellow-500 mr-2"></i> Coin tizimi
+                        </h2>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-plus text-yellow-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-300">Har bir bosqichni yakunlaganingizda 1 coin olasiz</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-sync-alt text-yellow-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-300">20 coin sarflab o'yinni qolgan joyidan davom ettirishingiz mumkin</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-save text-yellow-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-300">O'yindagi natijangiz avtomatik saqlanadi</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-900/50 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-trophy text-yellow-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-300">Coinlardan foydalanib o'yin maydoni darajangizni saqlang</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Maslahatlar paneli -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Maslahatlar
+                        </h2>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-400">Katakchalarni guruhlarga bo'lib eslab qoling</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-400">Ko'rsatilayotganda ovoz chiqarib sanang</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-400">Har doim diqqatingizni jamlang</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-3 mt-0.5">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                                <span class="text-gray-400">Mantiqiy ketma-ketliklarni qidirishni sinab ko'ring</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Modal - o'yin yakunida ko'rsatiladigan -->
+    <div id="game-over-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-xl border border-gray-700 p-8 max-w-md w-full mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 rounded-full bg-red-900/30 mx-auto flex items-center justify-center mb-4">
+                    <i class="fas fa-hourglass-end text-3xl text-red-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">O'yin tugadi!</h2>
+                <p class="text-gray-400">Siz <span id="final-score" class="text-yellow-500 font-bold">0</span> ball to'pladingiz</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p class="text-sm text-gray-400">Daraja</p>
+                    <p id="final-level" class="text-xl font-bold text-purple-400">1</p>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p class="text-sm text-gray-400">O'lcham</p>
+                    <p id="final-grid-size" class="text-xl font-bold text-blue-400">3×3</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-700/30 p-4 rounded-lg mb-6 text-center">
+                <p class="text-gray-300 mb-2">20 coin sarflab o'yinni davom ettirishingiz mumkin</p>
+                <div class="text-yellow-400 font-bold flex items-center justify-center text-xl">
+                    <i class="fas fa-coins mr-2"></i> <span id="coin-display-modal">{{ user.coins }}</span>
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button id="play-again-button" class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition">
+                    Qayta o'ynash
+                </button>
+                <button id="share-button" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elementlari -->
     <audio id="background-music" loop>
         <source src="/static/music/background.mp3" type="audio/mp3">
     </audio>
     <audio id="click-sound">
         <source src="/static/music/click.mp3" type="audio/mp3">
+    </audio>
+    <audio id="success-sound">
+        <source src="/static/music/success.mp3" type="audio/mp3">
+    </audio>
+    <audio id="error-sound">
+        <source src="/static/music/error.mp3" type="audio/mp3">
     </audio>
 
     <script>
@@ -163,8 +499,49 @@
         // Foydalanuvchi ma'lumotlarini o'zgaruvchi sifatida saqlash
         const user = {
             id: "{{ user.id }}",
-            name: "{{ user.full_name }}"
+            name: "{{ user.full_name }}",
+            coins: "{{ user.coins }}",
+            isAdmin: "{% if user.is_admin %}true{% else %}false{% endif %}"
         };
+        
+        // Tema almashtirish
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Saqlangan temani tekshirish
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+            document.documentElement.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        // Musiqa togglash
+        const musicToggle = document.getElementById('music-toggle');
+        const backgroundMusic = document.getElementById('background-music');
+        const musicIcon = document.getElementById('music-icon');
+        
+        musicToggle.addEventListener('click', () => {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                musicIcon.classList.remove('fa-volume-mute');
+                musicIcon.classList.add('fa-volume-up');
+            } else {
+                backgroundMusic.pause();
+                musicIcon.classList.remove('fa-volume-up');
+                musicIcon.classList.add('fa-volume-mute');
+            }
+        });
     </script>
     <script src="/static/js/game.js"></script>
 </body>

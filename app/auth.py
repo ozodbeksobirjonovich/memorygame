@@ -1,9 +1,17 @@
+# app/auth.py
 from datetime import datetime, timedelta
 import secrets
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, Request, status
-from app.models import User, Session
 import uuid
+import sys
+import os
+
+# Make sure the app package is in the path
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+
+# Import after path correction
+from app.models import User, Session
 
 # Security constants
 SESSION_EXPIRE_DAYS = 7

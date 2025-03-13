@@ -1,57 +1,103 @@
+<!-- app/templates/login.html -->
 <!DOCTYPE html>
-<html lang="uz">
-
+<html lang="uz" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirish - Memory Game</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Kirish - Memory Chempion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
 </head>
-
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 m-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-8 m-4">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Memory Game</h1>
-            <p class="text-gray-600">Tizimga kirish</p>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500 mb-2">
+                Memory<span class="text-blue-400">Chempion</span>
+            </h1>
+            <p class="text-gray-400">Tizimga kirish</p>
         </div>
 
-        <div id="error-message" class="hidden bg-red-500 text-white p-3 rounded-md mb-4 text-center"></div>
+        <div id="error-message" class="hidden bg-red-900/30 border border-red-700 text-red-400 p-3 rounded-lg mb-4 text-center"></div>
 
         <form id="login-form" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-medium text-gray-700">Foydalanuvchi nomi</label>
+                <label for="username" class="block text-sm font-medium text-gray-400 mb-1">Foydalanuvchi nomi</label>
                 <input type="text" id="username" name="username"
-                    class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
                     required>
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-medium text-gray-700">Parol</label>
+                <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Parol</label>
                 <input type="password" id="password" name="password"
-                    class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
                     required>
             </div>
 
             <div>
                 <button type="submit"
-                    class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition">
-                    Kirish
+                    class="w-full py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition flex items-center justify-center">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Kirish
                 </button>
             </div>
         </form>
 
         <div class="mt-6 text-center">
-            <p class="text-gray-600">Hisobingiz yo'qmi? <a href="/register"
-                    class="text-blue-600 hover:text-blue-800 font-medium">Ro'yxatdan o'ting</a></p>
+            <p class="text-gray-400">Hisobingiz yo'qmi? <a href="/register"
+                    class="text-blue-400 hover:text-blue-300 font-medium">Ro'yxatdan o'ting</a></p>
         </div>
 
         <div class="mt-8 text-center">
-            <a href="/" class="text-gray-500 hover:text-gray-700 font-medium">&larr; Bosh sahifaga qaytish</a>
+            <a href="/" class="text-gray-500 hover:text-gray-400 font-medium flex items-center justify-center">
+                <i class="fas fa-arrow-left mr-2"></i> Bosh sahifaga qaytish
+            </a>
         </div>
     </div>
 
+    <script>
+        // Tema almashtirish qismi
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <script src="/static/js/auth.js"></script>
 </body>
-
 </html>

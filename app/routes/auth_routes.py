@@ -1,3 +1,4 @@
+# app/routes/auth_routes.py
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form, UploadFile, File
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -50,7 +51,11 @@ async def login(
         path="/",
     )
     
-    return {"status": "success", "user_id": user.id}
+    # Check if admin and return appropriate redirect
+    if user.is_admin:
+        return {"status": "success", "user_id": user.id, "is_admin": True}
+    else:
+        return {"status": "success", "user_id": user.id, "is_admin": False}
 
 @router.post("/register")
 async def register_user(
@@ -74,7 +79,7 @@ async def register_user(
     hashed_password = get_password_hash(password)
     
     # Save avatar if provided, else use default
-    avatar_filename = "default_avatar.jpg"  # O'zgartirilgan qator - default rasm nomi
+    avatar_filename = "default_avatar.jpg"
     
     if avatar and avatar.filename:
         # Create uploads directory if it doesn't exist
@@ -93,6 +98,11 @@ async def register_user(
     
     # Create user
     try:
+        # Set first user as admin
+        is_admin = False
+        if User.select().count() == 0:
+            is_admin = True
+            
         User.create(
             username=username,
             password=hashed_password,
@@ -100,7 +110,9 @@ async def register_user(
             birthdate=birthdate,
             region=region,
             district=district,
-            avatar=avatar_filename
+            avatar=avatar_filename,
+            is_admin=is_admin,
+            coins=10  # Starting coins
         )
         
         return JSONResponse(

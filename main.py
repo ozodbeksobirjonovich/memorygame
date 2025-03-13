@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Request
+# main.py
+from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import create_tables
-from app.routes import auth_routes, game_routes, user_routes
+from app.auth import get_current_user
+from app.models import User
+from app.routes import auth_routes, game_routes, user_routes, admin_routes
 import uvicorn
 import os
 
@@ -28,6 +31,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.include_router(auth_routes.router)
 app.include_router(game_routes.router)
 app.include_router(user_routes.router)
+app.include_router(admin_routes.router)
 
 @app.on_event("startup")
 def startup():
